@@ -1,6 +1,7 @@
 ### Synthesis 
 
 Ideas:
+
 -	Microphone, MIDI, WAV input -> sound.
 
 -	Sound -> generative models -> new music.
