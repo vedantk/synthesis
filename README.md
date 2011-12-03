@@ -1,7 +1,6 @@
-### Berkeley Synthesis Project
+### Synthesis 
 
 Ideas:
-
 -	Microphone, MIDI, WAV input -> sound.
 
 -	Sound -> generative models -> new music.
@@ -11,4 +10,5 @@ Ideas:
 -	(New) compositions -> new music.
 
 Collection of python music libraries:
+
 http://wiki.python.org/moin/PythonInMusic
