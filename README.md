@@ -10,6 +10,9 @@ Ideas:
 
 -	(New) compositions -> new music.
 
+- 	Robots!
+
 Collection of python music libraries:
 
 http://wiki.python.org/moin/PythonInMusic
+
