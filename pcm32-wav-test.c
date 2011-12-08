@@ -13,9 +13,16 @@
 
 #define DURATION 	3 	/* Length, in seconds. */
 #define SAMPLE_RATE 	44100 	/* Samples per second. */
-#define VOLUME 		0.5 	/* [0.0, 1.0]. */
+#define VOLUME 		1.0	/* [0.0, 1.0]. */
 
-#define M_PI 		acos(-1)
+#define BITS 		32 	/* Bits per sample. */
+#if BITS == 24
+# define SND_FORMAT 	SF_FORMAT_PCM_24
+#elif BITS == 32
+# define SND_FORMAT 	SF_FORMAT_PCM_32
+#endif
+
+#define M_PI 		3.141592654
 
 /* Generate a value in [-1.0, 1.0]. */ 
 typedef float (*snd_generator)(void* state, int frame);
@@ -27,7 +34,7 @@ void create_file(const char* name, snd_generator sampler, void* state) {
 	sfinfo.samplerate = SAMPLE_RATE;
 	int nr_frames = DURATION * SAMPLE_RATE;
 	sfinfo.frames = nr_frames;
-	sfinfo.format = (SF_FORMAT_WAV | SF_FORMAT_PCM_32);
+	sfinfo.format = (SF_FORMAT_WAV | SND_FORMAT);
 	SNDFILE* file = sf_open(name, SFM_WRITE, &sfinfo);
 	if (!file) {
 		puts("Error: couldn't open file for writing.");
@@ -41,10 +48,9 @@ void create_file(const char* name, snd_generator sampler, void* state) {
 		return;
 	}
 
-	int bits = 32;
 	/* This logic only works if bits > 8. */
-	int64_t range_max = (1LL << bits) - 1;
-	int64_t range_diff = (1LL << (bits - 1));
+	int64_t range_max = (1LL << BITS) - 1;
+	int64_t range_diff = (1LL << (BITS - 1));
 	for (int i=0; i < nr_frames; ++i) {
 		/* Clamp the sampler. */
 		float val = sampler(state, i) * VOLUME;
@@ -71,7 +77,8 @@ struct snd_gen_wave {
 
 static float sine_sampler(void* state, int frame) {
 	struct snd_gen_wave* info = state;
-	return sin(2 * M_PI * frame * (SAMPLE_RATE / info->freq));
+	float val = sin(2 * M_PI * frame * (SAMPLE_RATE / info->freq));
+	return val;
 }
 
 /* Combine two generators. */
@@ -104,6 +111,7 @@ int main() {
 	struct snd_gen_combined wave7 = {&wave1, &wave6, sine_sampler, sine_sampler};
 	create_file("beejs_combination.wav", combined_sampler, &wave7);
 
+	/* BUG: Sampling at certain frequencies create very quiet waves! */
 	create_file("sine-350.wav", sine_sampler, &wave6);
 
 	return 0;
