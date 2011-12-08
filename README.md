@@ -14,7 +14,12 @@ Ideas:
 
 - 	Robots!
 
-Collection of python music libraries:
+Worth looking into:
 
-http://wiki.python.org/moin/PythonInMusic
+- 	http://wiki.python.org/moin/PythonInMusic
 
+- 	http://mit.edu/music21/
+
+- 	http://nsound.sourceforge.net/index.html
+
+- 	http://docs.python.org/release/2.4/lib/Wave-read-objects.html
