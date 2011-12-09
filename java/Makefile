@@ -1,2 +1,3 @@
 all:
-	make -C com/
+	make -C com/hack/mc
+	make -C com/hack/midi
