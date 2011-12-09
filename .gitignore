@@ -1,3 +1,4 @@
 *.wav
+*.pyc
 *.class
 pcm32-wav-test

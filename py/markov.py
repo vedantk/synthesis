@@ -39,6 +39,7 @@ class MarkovChain:
                 '''seq: Iterable of hash-able information.'''
                 for state, node in self._find_transitions(seq):
                         self.transitions[state].update(node)
+                self._state_list = list(self.transitions.keys())
 
         def _find_transitions(self, seq):
                 '''Generate all states and their futures.'''
@@ -48,9 +49,12 @@ class MarkovChain:
                                 if len(state) == j and (i + j) < len(seq):
                                         yield tuple(state), seq[i + j]
 
+        def random_state(self):
+                return random.choice(self._state_list)
+
         def walk(self):
                 '''Generate a walk through the chain.'''
-                start = random.choice(list(self.transitions.keys()))
+                start = self.random_state()
                 history = deque(start, maxlen=self.n_limit)
                 while True:
                         node = self.walk_from(tuple(history))
@@ -64,5 +68,4 @@ class MarkovChain:
                         if nodes.total > 0:
                                 return nodes.sample()
                         state = tuple(state[1:])
-                raise ValueError("No future nodes for the given state.")
-                
+                return self.walk_from(self.random_state())
