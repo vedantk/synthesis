@@ -1,0 +1,7 @@
+Wav generation right now gets a lot of its 'spontaneity' when the walk_from function gets a new random seed. At this stage, that's good and bad news. The good news is that the markov chain implementation works *really* well, because it pieces together output that closely resembles the original. The bad news is that the output overfits to the original. A lot.
+
+One way to avoid overfitting might be to smooth the audio buffer. That way, the differences in PCM values aren't as large, and markov states are more likely to branch. A problem with that is making sure that you use the unsmoothed values when generating output from a random walk (unless you don't care about lossy smoothing).
+
+Another method would be to place every PCM value in a fixed-size interval. You would first split the range of possible PCM values into a set of intervals (of length=delta). Then you would label each PCM value with which interval it belongs to, and train on the label data.
+
+And we haven't even started on taking derivatives of the PCM buffer yet.. That should be interesting!

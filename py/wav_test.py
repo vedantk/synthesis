@@ -5,12 +5,12 @@ import wave
 from markov import MarkovChain
 
 if __name__ == '__main__':
-        chain = MarkovChain(5)
+        chain = MarkovChain(3)
         f = wave.open("heritage.wav", 'r')
         print "Loading data..."
         buf = []
         # Just load a few seconds of audio...
-        for k in xrange(15 * f.getframerate()):
+        for k in xrange(25 * f.getframerate()):
                 buf.append(f.readframes(1))
         print "Building Markov chain..."
         chain.add_sequence(buf)
