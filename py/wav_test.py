@@ -10,7 +10,11 @@ if __name__ == '__main__':
         print "Loading data..."
         buf = []
         # Just load a few seconds of audio...
-        for k in xrange(25 * f.getframerate()):
+        nr_secs = 25
+        nr_frames = nr_secs * f.getframerate()
+        f.readframes(nr_frames)
+        f.rewind()
+        for k in xrange(nr_frames):
                 buf.append(f.readframes(1))
         print "Building Markov chain..."
         chain.add_sequence(buf)
