@@ -13,14 +13,23 @@ A Markov chain maps states to their branches.
 
 class Branch:
         def __init__(self):
+                '''Node => Frequency'''
                 self.total = 0.0
-                self.counts = defaultdict(int) # Node => Frequency
+                self.counts = defaultdict(int)
 
         def update(self, node):
+                '''Add a future node to this branch.'''
                 self.total += 1
                 self.counts[node] += 1
 
+        def merge_branch(self, branch):
+                '''Merge another branch into this one.'''
+                self.total += branch.total
+                for node, freq in branch.counts.items():
+                        self.counts[node] += freq
+
         def sample(self):
+                '''Randomly sample a node from this branch.'''
                 thresh = random.random()
                 for node, freq in self.counts.items():
                         probability = freq / self.total
@@ -31,9 +40,10 @@ class Branch:
 
 class MarkovChain:
         def __init__(self, n_limit):
-                '''n_limit: Maximum history per node.'''
+                '''State => Branch
+                n_limit: Maximum history per node.'''
                 self.n_limit = n_limit
-                self.transitions = defaultdict(Branch) # State => [Node]
+                self.transitions = defaultdict(Branch)
 
         def add_sequence(self, seq):
                 '''seq: List of hash-able information.'''
@@ -50,6 +60,7 @@ class MarkovChain:
                                         yield tuple(state), seq[i + j]
 
         def random_state(self):
+                '''Pick a random state in the chain.'''
                 return random.choice(self._state_list)
 
         def walk(self):
@@ -64,11 +75,16 @@ class MarkovChain:
         def walk_from(self, state):
                 '''Take one random step in the chain.'''
                 while len(state):
-                        nodes = self.transitions[state]
-                        if nodes.total > 0:
-                                return nodes.sample()
+                        branch = self.transitions[state]
+                        if branch.total > 0:
+                                return branch.sample()
                         state = tuple(state[1:])
                 return self.walk_from(self.random_state())
+
+        def merge_chain(self, chain):
+                '''Merge another chain into this one.'''
+                for state, branch in chain.transitions.items():
+                        self.transitions[state].merge_branch(branch)
 
 class SparseMarkovChain(MarkovChain):
         def _find_transitions(self, seq):
