@@ -36,7 +36,7 @@ class MarkovChain:
                 self.transitions = defaultdict(Branch) # State => [Node]
 
         def add_sequence(self, seq):
-                '''seq: Iterable of hash-able information.'''
+                '''seq: List of hash-able information.'''
                 for state, node in self._find_transitions(seq):
                         self.transitions[state].update(node)
                 self._state_list = list(self.transitions.keys())
@@ -69,3 +69,11 @@ class MarkovChain:
                                 return nodes.sample()
                         state = tuple(state[1:])
                 return self.walk_from(self.random_state())
+
+class SparseMarkovChain(MarkovChain):
+        def _find_transitions(self, seq):
+                for i in xrange(len(seq)):
+                        state = seq[i:self.n_limit+i]
+                        if len(state) == self.n_limit and (i + self.n_limit) < len(seq):
+                                yield tuple(state), seq[i + self.n_limit]
+
