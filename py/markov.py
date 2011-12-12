@@ -25,13 +25,13 @@ class Branch:
         def merge_branch(self, branch):
                 '''Merge another branch into this one.'''
                 self.total += branch.total
-                for node, freq in branch.counts.items():
+                for node, freq in branch.counts.iteritems():
                         self.counts[node] += freq
 
         def sample(self):
                 '''Randomly sample a node from this branch.'''
                 thresh = random.random()
-                for node, freq in self.counts.items():
+                for node, freq in self.counts.iteritems():
                         probability = freq / self.total
                         if probability >= thresh:
                                 return node
@@ -49,15 +49,7 @@ class MarkovChain:
                 '''seq: List of hash-able information.'''
                 for state, node in self._find_transitions(seq):
                         self.transitions[state].update(node)
-                self._state_list = list(self.transitions.keys())
-
-        def _find_transitions(self, seq):
-                '''Generate all states and their futures.'''
-                for i in xrange(len(seq)):
-                        for j in xrange(1, self.n_limit + 1):
-                                state = seq[i:i+j]
-                                if len(state) == j and (i + j) < len(seq):
-                                        yield tuple(state), seq[i + j]
+                self._update_state_list()
 
         def random_state(self):
                 '''Pick a random state in the chain.'''
@@ -83,9 +75,21 @@ class MarkovChain:
 
         def merge_chain(self, chain):
                 '''Merge another chain into this one.'''
-                for state, branch in chain.transitions.items():
+                for state, branch in chain.transitions.iteritems():
                         self.transitions[state].merge_branch(branch)
+                self._update_state_list()
 
+        def _find_transitions(self, seq):
+                '''Generate all states and their futures.'''
+                for i in xrange(len(seq)):
+                        for j in xrange(1, self.n_limit + 1):
+                                state = seq[i:i+j]
+                                if len(state) == j and (i + j) < len(seq):
+                                        yield tuple(state), seq[i + j]
+
+        def _update_state_list(self):
+                self._state_list = list(self.transitions.keys())
+ 
 class SparseMarkovChain(MarkovChain):
         def _find_transitions(self, seq):
                 for i in xrange(len(seq)):

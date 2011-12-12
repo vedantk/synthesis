@@ -26,9 +26,12 @@ if __name__ == '__main__':
         print "Building Markov chain..."
         chain.add_sequence(buf)
         gen = chain.walk()
-        out = wave.open("{0}-markov-output.wav".format(fname[:fname.find('.')), 'wb')
+        out = wave.open("{0}-markov-output.wav".format(fname[:fname.find('.')]), 'wb')
         print "Generating output..."
         out.setparams(f.getparams())
+        chunk = f.getnframes() / 100
         for k in xrange(f.getnframes()):
+                if k % chunk == 0:
+                        print k / chunk, "%"
                 out.writeframes(next(gen))
 
