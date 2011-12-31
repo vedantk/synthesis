@@ -2,4 +2,5 @@
 *.ogg
 *.pyc
 *.class
+dat/
 pcm32-wav-test
