@@ -2,9 +2,6 @@
 
 import sys
 import wave
-import math
-import struct
-import random
 from markov import MarkovChain
 
 class Sampler:
@@ -18,6 +15,7 @@ class Sampler:
         frames = f.readframes(nr_frames)
         self.buf = [self.pcm_to_repr(frames[i:i+4])
                     for i in xrange(0, nr_frames * 4, 4)]
+        self.pre_process()
 
     def initialize(self):
         pass
@@ -30,6 +28,10 @@ class Sampler:
         '''Convert chunk into a 4 byte PCM frame.'''
         return chunk
 
+    def pre_process(self):
+        '''Modify the entire buffer before it's fed into the chain.'''
+        pass
+
     def sample(self, outf, nr_frames=1e6, n=3):
         '''Sample using an n-gram into the given file.'''
         chain = MarkovChain(n)
@@ -39,25 +41,22 @@ class Sampler:
         out.setparams(self.params)
         out.setnframes(nr_frames)
         chunk = nr_frames / 100
-        for k in xrange(nr_frames):
+        for k in xrange(int(nr_frames)):
             if k % chunk == 0:
                 print k / chunk, "%"
             out.writeframes(self.repr_to_pcm(next(gen)))
 
-class WideBandSampler(Sampler):
-    def initialize(self):
-        self.width = 16
-
-    def pcm_to_repr(self, frame):
-        val = struct.unpack('@i', frame)[0]
-        return int(val / self.width)
-
-    def repr_to_pcm(self, chunk):
-        val = self.width * chunk 
-        return struct.pack('@i', random.randint(0, self.width) + chunk)
+def clamp(val, low, high):
+    if val < low:
+        return low
+    elif val > high:
+        return high
+    return val
 
 if __name__ == '__main__':
+    from wide_sampler import WideBandSampler
+    from diff_sampler import DiffSampler
     print "Loading data..."
-    gen = WideBandSampler(sys.argv[1])
+    gen = DiffSampler(sys.argv[1])
     print "Sampling chain..."
     gen.sample('bsp-out.wav')
