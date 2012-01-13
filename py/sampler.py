@@ -2,9 +2,10 @@
 
 import sys
 import wave
+import struct
 from markov import MarkovChain
 
-class Sampler:
+class Sampler(object):
     def __init__(self, fname, nr_secs=15):
         '''Load <nr_secs> of PCM data from <fname>.'''
         self.initialize()
@@ -13,24 +14,20 @@ class Sampler:
         self.params = f.getparams()
         nr_frames = nr_secs * f.getframerate()
         frames = f.readframes(nr_frames)
-        self.buf = [self.pcm_to_repr(frames[i:i+4])
+        self.buf = [struct.unpack('@i', frames[i:i+4])[0]
                     for i in xrange(0, nr_frames * 4, 4)]
         self.pre_process()
 
     def initialize(self):
         pass
 
-    def pcm_to_repr(self, frame):
-        '''Convert 4 bytes of PCM data into any format.'''
-        return frame
-
-    def repr_to_pcm(self, chunk):
-        '''Convert chunk into a 4 byte PCM frame.'''
-        return chunk
-
     def pre_process(self):
         '''Modify the entire buffer before it's fed into the chain.'''
         pass
+
+    def repr_to_pcm(self, chunk):
+        '''Convert pre-processed data into the 4-byte PCM format.'''
+        return struct.pack('@i', clamp(chunk, -2147483647, 2147483647))
 
     def sample(self, outf, nr_frames=1e6, n=3):
         '''Sample using an n-gram into the given file.'''
@@ -54,9 +51,10 @@ def clamp(val, low, high):
     return val
 
 if __name__ == '__main__':
-    from wide_sampler import WideBandSampler
-    from diff_sampler import DiffSampler
+    # from diff_sampler import DiffSampler
+    # from wide_sampler import WideBandSampler
+    from smooth_sampler import SmoothSampler
     print "Loading data..."
-    gen = DiffSampler(sys.argv[1])
+    gen = SmoothSampler(sys.argv[1])
     print "Sampling chain..."
     gen.sample('bsp-out.wav')
